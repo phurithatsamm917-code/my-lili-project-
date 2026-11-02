@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Love Journey 💖</title>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&family=Mali:wght@500;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Mali', 'Itim', cursive, sans-serif; user-select: none; -webkit-user-select: none; }
+        body { background-color: #fce4ec; background-image: radial-gradient(#f8bbd0 1.5px, transparent 1.5px); background-size: 24px 24px; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .phone-frame { width: 360px; height: 720px; background: #fff9f6; border: 4px solid #5d4037; border-radius: 45px; box-shadow: 8px 12px 0px rgba(93, 64, 55, 0.15), 0 20px 40px rgba(0,0,0,0.1); position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        .phone-notch { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 120px; height: 22px; background: #fff9f6; border: 3px solid #5d4037; border-radius: 12px; z-index: 100; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .notch-camera { width: 8px; height: 8px; background: #5d4037; border-radius: 50%; }
+        .notch-speaker { width: 40px; height: 5px; background: #5d4037; border-radius: 3px; }
+        .status-bar { height: 45px; padding: 18px 25px 0 25px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #5d4037; font-weight: 700; z-index: 90; font-family: 'Quicksand', sans-serif; }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; transition: transform 0.4s ease; background: #fff0f5; transform: translateX(100%); z-index: 5; }
+        .screen.active { transform: translateX(0); }
+        .screen.slide-out { transform: translateX(-100%); }
+
+        /* LOCK SCREEN */
+        #lock-screen { background: linear-gradient(180deg, #ffd1dc 0%, #ffe4e1 40%, #f3e5f5 100%); padding-top: 70px; align-items: center; justify-content: space-between; padding-bottom: 35px; z-index: 10; transform: translateX(0); }
+        .moon-pastel { position: absolute; top: 55px; right: 35px; width: 50px; height: 50px; background: #fff59d; border: 3px solid #5d4037; border-radius: 50%; box-shadow: inset -7px -2px 0px #fbc02d, 3px 3px 0px rgba(93, 64, 55, 0.15); z-index: 2; }
+        .rain-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }
+        .drop { position: absolute; background: linear-gradient(180deg, rgba(255,182,193,0.8), rgba(244,143,177,0.4)); width: 2.5px; height: 22px; border-radius: 3px; animation: fall 1.2s linear infinite; }
+        @keyframes fall { 0% { transform: translateY(-30px); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: translateY(720px); opacity: 0.2; } }
+
+        .clock-container { text-align: center; color: #5d4037; z-index: 5; }
+        .time-text { font-size: 58px; font-weight: 700; letter-spacing: 2px; text-shadow: 3px 3px 0px #ffb6c1; line-height: 1; margin-bottom: 5px; font-family: 'Quicksand', sans-serif; }
+        .date-text { font-size: 15px; background: rgba(255, 255, 255, 0.85); padding: 4px 14px; border-radius: 20px; border: 2px dashed #5d4037; display: inline-block; box-shadow: 2px 2px 0px rgba(93, 64, 55, 0.08); }
+
+        .cute-illustration { position: relative; z-index: 5; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .minimal-heart-circle { width: 125px; height: 125px; background: #ffffff; border: 4px solid #5d4037; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 4px 6px 0px rgba(93, 64, 55, 0.15); animation: floatHeart 3s ease-in-out infinite; }
+        @keyframes floatHeart { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-8px) rotate(3deg); } }
+        .twin-hearts { display: flex; align-items: center; justify-content: center; gap: 2px; }
+        .heart-main { font-size: 48px; color: #ff7597; filter: drop-shadow(2px 2px 0px #5d4037); }
+        .heart-sub { font-size: 34px; color: #ffb3c6; margin-top: -15px; margin-left: -10px; filter: drop-shadow(2px 2px 0px #5d4037); }
+        .special-tag { font-size: 13px; background: #ffffff; padding: 5px 16px; border-radius: 18px; border: 3px solid #5d4037; color: #5d4037; font-weight: 700; box-shadow: 2px 3px 0px rgba(93, 64, 55, 0.15); }
+
+        /* SLIDER */
+        .slider-container { width: 280px; height: 58px; background: rgba(255, 255, 255, 0.9); border: 3px solid #5d4037; border-radius: 35px; position: relative; display: flex; align-items: center; padding: 4px; box-shadow: 0 4px 0px rgba(93, 64, 55, 0.15); overflow: hidden; z-index: 10; }
+        .slider-text { width: 100%; text-align: center; font-size: 15px; font-weight: 700; color: #8d6e63; padding-left: 40px; }
+        .slider-handle { width: 46px; height: 46px; background: #ffb6c1; border: 3px solid #5d4037; border-radius: 50%; position: absolute; left: 5px; cursor: pointer; display: flex; justify-content: center; align-items: center; color: #5d4037; font-size: 18px; box-shadow: 2px 2px 0px #5d4037; z-index: 15; touch-action: none; }
+
+        /* PASSCODE SCREEN */
+        #passcode-screen { background: #fff0f5; padding-top: 80px; align-items: center; z-index: 20; }
+        #passcode-screen.shake { animation: shake 0.4s ease-in-out; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-12px); } 40%, 80% { transform: translateX(12px); } }
+        .passcode-title { font-size: 22px; color: #5d4037; margin-bottom: 25px; font-weight: 700; font-family: 'Quicksand', sans-serif; letter-spacing: 1px; }
+        .dots-container { display: flex; gap: 15px; margin-bottom: 35px; }
+        .dot { width: 18px; height: 18px; border: 3px solid #5d4037; border-radius: 50%; background: transparent; transition: all 0.2s ease; }
+        .dot.filled { background: #ff8da1; transform: scale(1.15); }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px 25px; width: 270px; }
+        .key-btn { width: 70px; height: 70px; background: #ffffff; border: 3px solid #5d4037; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 26px; font-weight: 700; color: #5d4037; cursor: pointer; box-shadow: 0 4px 0px #5d4037; transition: all 0.1s; position: relative; font-family: 'Quicksand', sans-serif; }
+        .key-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px #5d4037; background: #ffe4e1; }
+        .heart-pop { position: absolute; color: #ff8da1; font-size: 24px; pointer-events: none; animation: popUp 0.6s ease-out forwards; }
+        @keyframes popUp { 0% { opacity: 1; transform: translateY(0) scale(0.5); } 100% { opacity: 0; transform: translateY(-40px) scale(1.4); } }
+
+        /* PROFILE SCREEN */
+        #profile-screen { background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%); padding-top: 100px; align-items: center; z-index: 25; text-align: center; }
+        .profile-title { font-size: 24px; color: #5d4037; margin-bottom: 10px; font-weight: 700; }
+        .profile-subtitle { font-size: 14px; color: #8d6e63; margin-bottom: 40px; font-family: 'Quicksand', sans-serif; }
+        .profile-buttons { display: flex; gap: 20px; justify-content: center; }
+        .profile-card { width: 120px; height: 150px; background: #fff; border: 3px solid #5d4037; border-radius: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; cursor: pointer; box-shadow: 4px 6px 0px rgba(93, 64, 55, 0.15); }
+        .profile-card:active { transform: translateY(3px); }
+        .profile-avatar { width: 65px; height: 65px; background: #ffe4e1; border: 3px solid #5d4037; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+        .profile-name { font-size: 16px; font-weight: 700; color: #5d4037; }
+
+        /* HOME SCREEN */
+        #home-screen { background: linear-gradient(180deg, #ffe4e1 0%, #fff9f6 100%); padding: 60px 15px 25px 15px; z-index: 30; display: flex; flex-direction: column; justify-content: space-between; }
+        .minimal-welcome-text { text-align: center; margin-bottom: 10px; color: #6d4c41; font-weight: 600; font-size: 13px; font-family: 'Quicksand', sans-serif; }
+        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 10px; padding: 5px; }
+        .app-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .app-icon { width: 52px; height: 52px; border: 3px solid #5d4037; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 22px; box-shadow: 3px 3px 0px rgba(93, 64, 55, 0.2); }
+        .app-name { font-size: 10px; color: #5d4037; font-weight: 700; white-space: nowrap; }
+        .icon-photos { background: #ffe082; color: #ff6f00; }
+        .icon-letter { background: #ff8da1; color: #ffffff; }
+        .icon-camera { background: #e0e0e0; color: #424242; }
+        .icon-memory { background: #c8e6c9; color: #2e7d32; }
+        .icon-music { background: #ce93d8; color: #ffffff; }
+        .icon-quiz { background: #ffccbc; color: #d84315; }
+        .icon-voice { background: #81d4fa; color: #01579b; }
+        .dock-bar { background: rgba(255, 255, 255, 0.65); border: 3px solid #5d4037; border-radius: 28px; padding: 8px 12px; display: flex; justify-content: space-around; box-shadow: 0 4px 0px rgba(93, 64, 55, 0.15); }
+
+        /* MODALS */
+        .app-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff9f6; z-index: 50; padding: 65px 20px 25px 20px; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s ease; }
+        .app-modal.open { transform: translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px dashed #ff8da1; padding-bottom: 8px; }
+        .modal-title { font-size: 18px; color: #5d4037; font-weight: 700; }
+        .close-app-btn { background: #ffb6c1; border: 2px solid #5d4037; border-radius: 15px; padding: 4px 12px; font-size: 13px; font-weight: 700; color: #5d4037; cursor: pointer; }
+        .card-box { background: #ffffff; border: 3px solid #5d4037; border-radius: 20px; padding: 15px; box-shadow: 3px 4px 0px rgba(93, 64, 55, 0.15); margin-bottom: 15px; text-align: center; }
+
+        /* LETTER APP */
+        .letter-container { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: 480px; padding: 5px; flex: 1; }
+        .letter-item { background: #fff; border: 2.5px solid #5d4037; border-radius: 15px; padding: 12px; box-shadow: 2px 2px 0px rgba(93, 64, 55, 0.1); text-align: left; }
+        .letter-author { font-size: 12px; font-weight: 700; color: #ff6b81; margin-bottom: 4px; }
+        .letter-text { font-size: 13px; color: #5d4037; line-height: 1.5; word-break: break-all; }
+        .letter-input-box { display: flex; gap: 8px; margin-top: 10px; }
+        .letter-input { flex: 1; padding: 8px 12px; border: 2px solid #5d4037; border-radius: 12px; font-size: 13px; outline: none; background: #fff0f5; color: #5d4037; }
+        .send-letter-btn { background: #ff8da1; border: 2px solid #5d4037; border-radius: 12px; padding: 0 15px; color: #fff; font-weight: 700; cursor: pointer; }
+
+        /* CAMERA APP */
+        .camera-view { width: 100%; height: 230px; background: #000; border: 3px solid #5d4037; border-radius: 16px; overflow: hidden; position: relative; margin-bottom: 10px; }
+        #webcam { width: 100%; height: 100%; object-fit: cover; }
+        #webcam.front-cam { transform: scaleX(-1); }
+        #webcam.back-cam { transform: scaleX(1); }
+        .camera-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .flip-cam-btn { background: #fff0f5; border: 2px solid #5d4037; border-radius: 12px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: #5d4037; cursor: pointer; }
+        .snap-btn { width: 50px; height: 50px; background: #ff8da1; border: 3px solid #5d4037; border-radius: 50%; cursor: pointer; box-shadow: 0 3px 0px #5d4037; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; margin: 0 auto; }
+        .caption-input { width: 100%; padding: 8px 12px; border: 2px solid #5d4037; border-radius: 12px; font-size: 13px; outline: none; margin-bottom: 10px; background: #fff0f5; color: #5d4037; }
+        .camera-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-out; }
+
+        /* PHOTOS GALLERY */
+        .photo-gallery { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: 500px; padding: 5px; flex: 1; }
+        .photo-card { background: #fff; border: 3px solid #5d4037; border-radius: 16px; overflow: hidden; box-shadow: 2px 3px 0px rgba(93, 64, 55, 0.15); text-align: left; }
+        .photo-card img { width: 100%; height: 150px; object-fit: cover; border-bottom: 2px solid #5d4037; }
+        .photo-info { padding: 10px; }
+        .photo-uploader { font-size: 12px; font-weight: 700; color: #ff6b81; margin-bottom: 2px; }
+        .photo-time { font-size: 10px; color: #888; margin-bottom: 3px; font-family: 'Quicksand', sans-serif; }
+        .photo-caption { font-size: 13px; color: #5d4037; font-weight: 600; }
+
+        /* MUSIC PLAYER APP */
+        .music-disk { width: 110px; height: 110px; background: #5d4037; border: 4px solid #ffb6c1; border-radius: 50%; margin: 8px auto; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); position: relative; }
+        .music-disk.playing { animation: spinDisk 4s linear infinite; }
+        @keyframes spinDisk { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .disk-center { width: 35px; height: 35px; background: #fff9f6; border: 3px solid #ffb6c1; border-radius: 50%; }
+        .music-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
+        .control-btn { width: 45px; height: 45px; background: #ffb6c1; border: 2.5px solid #5d4037; border-radius: 50%; font-size: 16px; color: #5d4037; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 3px 0px #5d4037; }
+        .control-btn:active { transform: translateY(2px); box-shadow: 0 1px 0px #5d4037; }
+
+        /* QUIZ APP (ROLEPLAY SURVIVAL + STAR POPUP) */
+        .quiz-box { background: #fff; border: 3px solid #5d4037; border-radius: 18px; padding: 15px; box-shadow: 3px 4px 0px rgba(93, 64, 55, 0.15); display: flex; flex-direction: column; gap: 10px; text-align: left; flex: 1; overflow-y: auto; }
+        .quiz-hud { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #5d4037; background: #ffe4e1; padding: 6px 10px; border-radius: 10px; align-items: center; }
+        .quiz-nav-btn { background: #fff; border: 1.5px solid #5d4037; border-radius: 8px; padding: 2px 8px; font-size: 11px; cursor: pointer; color: #5d4037; font-weight: bold; }
+        .quiz-question { font-size: 13px; font-weight: 700; color: #5d4037; line-height: 1.4; }
+        .quiz-options { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; }
+        .quiz-opt-btn { background: #fff0f5; border: 2px solid #5d4037; border-radius: 12px; padding: 10px; font-size: 12px; font-weight: 700; color: #5d4037; cursor: pointer; text-align: left; transition: all 0.1s; }
+        .quiz-opt-btn:active { background: #ffb6c1; transform: scale(0.98); }
+        .quiz-feedback { font-size: 13px; font-weight: bold; text-align: center; padding: 12px; border-radius: 14px; margin-top: 5px; border: 2px solid #5d4037; }
+        .star-rating-box { font-size: 28px; color: #fbc02d; margin: 6px 0; text-shadow: 1px 2px 0px #5d4037; animation: bounceStars 0.5s ease; }
+        @keyframes bounceStars { 0% { transform: scale(0); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+        /* VOICE ME&U APP */
+        .voice-container { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 380px; padding: 5px; flex: 1; }
+        .voice-card { background: #fff; border: 2.5px solid #5d4037; border-radius: 15px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 2px 2px 0px rgba(93, 64, 55, 0.1); }
+        .voice-info { display: flex; flex-direction: column; text-align: left; }
+        .voice-author { font-size: 12px; font-weight: 700; color: #0277bd; }
+        .voice-time { font-size: 10px; color: #888; font-family: 'Quicksand', sans-serif; }
+        .play-voice-btn { width: 38px; height: 38px; background: #81d4fa; border: 2px solid #5d4037; border-radius: 50%; color: #01579b; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 0px #5d4037; }
+        .record-box { background: #e1f5fe; border: 2.5px dashed #0288d1; border-radius: 15px; padding: 12px; text-align: center; margin-top: 10px; }
+        .record-btn { background: #03a9f4; border: 2.5px solid #5d4037; border-radius: 20px; padding: 8px 20px; color: #fff; font-weight: 700; cursor: pointer; box-shadow: 0 3px 0px #5d4037; font-size: 13px; }
+        .record-btn.recording { background: #e53935; animation: pulseRec 1s infinite; }
+        @keyframes pulseRec { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* TIMER */
+        .timer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+        .timer-unit { background: #fff0f5; border: 2px solid #ff8da1; border-radius: 12px; padding: 8px 5px; }
+        .timer-val { font-size: 20px; font-weight: 700; color: #5d4037; font-family: 'Quicksand', sans-serif; }
+        .timer-lbl { font-size: 11px; color: #888; }
+        .relock-footer { text-align: center; margin-top: auto; }
+        .relock-btn { background: #ffb6c1; border: 3px solid #5d4037; padding: 8px 20px; border-radius: 20px; color: #5d4037; font-weight: 700; cursor: pointer; box-shadow: 2px 3px 0px #5d4037; }
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame">
+        <div class="phone-notch">
+            <div class="notch-speaker"></div>
+            <div class="notch-camera"></div>
+        </div>
+
+        <div class="status-bar">
+            <span id="statusBarTime">00:00</span>
+            <div>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-full" style="margin-left: 5px;"></i>
+            </div>
+        </div>
+
+        <!-- Hidden YouTube Player iframe -->
+        <div id="youtubePlayerContainer" style="display:none;"></div>
+
+        <!-- 1. LOCK SCREEN -->
+        <div class="screen active" id="lock-screen">
+            <div class="moon-pastel"></div>
+            <div class="rain-container" id="rainContainer"></div>
+
+            <div class="clock-container">
+                <div class="time-text" id="lockScreenTime">00:00</div>
+                <div class="date-text" id="lockScreenDate">กำลังโหลด...</div>
+            </div>
+
+            <div class="cute-illustration">
+                <div class="minimal-heart-circle">
+                    <div class="twin-hearts">
+                        <i class="fas fa-heart heart-main"></i>
+                        <i class="fas fa-heart heart-sub"></i>
+                    </div>
+                </div>
+                <div class="special-tag">Our Special Day ✨</div>
+            </div>
+
+            <div class="slider-container" id="sliderContainer">
+                <div class="slider-text">เลื่อนเพื่อใส่รหัส &gt;</div>
+                <div class="slider-handle" id="sliderHandle">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. PASSCODE SCREEN -->
+        <div class="screen" id="passcode-screen">
+            <div class="passcode-title">Enter password</div>
+            
+            <div class="dots-container">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+
+            <div class="keypad">
+                <div class="key-btn" onclick="pressKey('1', event)">1</div>
+                <div class="key-btn" onclick="pressKey('2', event)">2</div>
+                <div class="key-btn" onclick="pressKey('3', event)">3</div>
+                <div class="key-btn" onclick="pressKey('4', event)">4</div>
+                <div class="key-btn" onclick="pressKey('5', event)">5</div>
+                <div class="key-btn" onclick="pressKey('6', event)">6</div>
+                <div class="key-btn" onclick="pressKey('7', event)">7</div>
+                <div class="key-btn" onclick="pressKey('8', event)">8</div>
+                <div class="key-btn" onclick="pressKey('9', event)">9</div>
+                <div style="visibility: hidden;"></div>
+                <div class="key-btn" onclick="pressKey('0', event)">0</div>
+                <div class="key-btn" onclick="deleteKey()" style="font-size: 18px;"><i class="fas fa-backspace"></i></div>
+            </div>
+        </div>
+
+        <!-- 3. SELECT PROFILE SCREEN -->
+        <div class="screen" id="profile-screen">
+            <div class="profile-title">คุณคือใครคะ? 💖</div>
+            <div class="profile-subtitle">เลือกมุมมองโทรศัพท์ของคุณได้เลย</div>
+            <div class="profile-buttons">
+                <div class="profile-card" onclick="selectUser('ไนท์')">
+                    <div class="profile-avatar">👦🏻</div>
+                    <div class="profile-name">ไนท์</div>
+                </div>
+                <div class="profile-card" onclick="selectUser('ลี่')">
+                    <div class="profile-avatar">👧🏻</div>
+                    <div class="profile-name">ลี่</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. HOME SCREEN -->
+        <div class="screen" id="home-screen">
+            <div>
+                <div class="minimal-welcome-text" id="welcomeText">welcome to my heart ✨</div>
+
+                <div class="app-grid">
+                    <div class="app-item" onclick="openApp('app-letter')">
+                        <div class="app-icon icon-letter"><i class="fas fa-envelope-open-text"></i></div>
+                        <span class="app-name">Letter</span>
+                    </div>
+                    <div class="app-item" onclick="openApp('app-photos')">
+                        <div class="app-icon icon-photos"><i class="fas fa-images"></i></div>
+                        <span class="app-name">Photos</span>
+                    </div>
+                    <div class="app-item" onclick="openApp('app-camera')">
+                        <div class="app-icon icon-camera"><i class="fas fa-camera"></i></div>
+                        <span class="app-name">Camera</span>
+                    </div>
+                    <div class="app-item" onclick="openApp('app-music')">
+                        <div class="app-icon icon-music"><i class="fas fa-music"></i></div>
+                        <span class="app-name">Music</span>
+                    </div>
+                    <div class="app-item" onclick="openApp('app-quiz')">
+                        <div class="app-icon icon-quiz"><i class="fas fa-gamepad"></i></div>
+                        <span class="app-name" id="homeQuizName">RolePlay</span>
+                    </div>
+                    <div class="app-item" onclick="openApp('app-voice')">
+                        <div class="app-icon icon-voice"><i class="fas fa-microphone-alt"></i></div>
+                        <span class="app-name">Voice me&U</span>
+                    </div>
+                    <div class="app-item" onclick="openApp('app-memory')">
+                        <div class="app-icon icon-memory"><i class="fas fa-heart"></i></div>
+                        <span class="app-name">Memory</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relock-footer">
+                <div class="dock-bar" style="margin-bottom: 12px;">
+                    <div class="app-item" onclick="openApp('app-quiz')">
+                        <div class="app-icon icon-quiz" style="width: 44px; height: 44px; font-size: 18px;"><i class="fas fa-gamepad"></i></div>
+                    </div>
+                    <div class="app-item" onclick="openApp('app-voice')">
+                        <div class="app-icon icon-voice" style="width: 44px; height: 44px; font-size: 18px;"><i class="fas fa-microphone-alt"></i></div>
+                    </div>
+                    <div class="app-item" onclick="openApp('app-music')">
+                        <div class="app-icon icon-music" style="width: 44px; height: 44px; font-size: 18px;"><i class="fas fa-music"></i></div>
+                    </div>
+                </div>
+                <button class="relock-btn" onclick="resetToLockScreen()">ล็อคหน้าจอ 🔒</button>
+            </div>
+        </div>
+
+        <!-- APP MODAL 1: LETTER -->
+        <div class="app-modal" id="app-letter">
+            <div class="modal-header">
+                <span class="modal-title">💌 จดหมายบอกความรู้สึก</span>
+                <button class="close-app-btn" onclick="closeApp('app-letter')">ปิด</button>
+            </div>
+            <div class="letter-container" id="letterContainer"></div>
+            <div class="letter-input-box">
+                <input type="text" id="letterInput" class="letter-input" placeholder="พิมพ์ข้อความบอกรักถึงกัน...">
+                <button class="send-letter-btn" onclick="sendLetter()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <!-- APP MODAL 2: PHOTOS -->
+        <div class="app-modal" id="app-photos">
+            <div class="modal-header">
+                <span class="modal-title">📸 อัลบั้มรูปคู่ของเรา</span>
+                <button class="close-app-btn" onclick="closeApp('app-photos')">ปิด</button>
+            </div>
+            <div class="photo-gallery" id="photoGallery"></div>
+        </div>
+
+        <!-- APP MODAL 3: CAMERA -->
+        <div class="app-modal" id="app-camera">
+            <div class="modal-header">
+                <span class="modal-title">📷 แอปกล้องถ่ายรูป</span>
+                <button class="close-app-btn" onclick="closeApp('app-camera')">ปิด</button>
+            </div>
+            <div class="camera-controls">
+                <span style="font-size: 12px; color: #5d4037; font-weight: 700;" id="cameraUserIndicator">ผู้ถ่าย: -</span>
+                <button class="flip-cam-btn" onclick="toggleCameraFacing()"><i class="fas fa-sync-alt"></i> สลับกล้อง</button>
+            </div>
+            <div class="camera-view">
+                <video id="webcam" autoplay playsinline></video>
+                <div class="camera-flash" id="cameraFlash"></div>
+            </div>
+            <input type="text" id="photoCaptionInput" class="caption-input" placeholder="พิมพ์คำบรรยายรูปนี้ เช่น ไปเดทกัน 🍜">
+            <button class="snap-btn" onclick="takeSnapshot()"><i class="fas fa-camera"></i></button>
+            <canvas id="photoCanvas" style="display: none;"></canvas>
+        </div>
+
+        <!-- APP MODAL 4: MUSIC -->
+        <div class="app-modal" id="app-music">
+            <div class="modal-header">
+                <span class="modal-title">🎵 เพลงคลั่งรักของเรา</span>
+                <button class="close-app-btn" onclick="closeApp('app-music')">ปิด</button>
+            </div>
+            <div class="card-box" style="padding: 15px; text-align: center;">
+                <div class="music-disk" id="musicDisk">
+                    <div class="disk-center"></div>
+                </div>
+                <div style="font-size: 13px; font-weight: bold; color: #5d4037; margin-bottom: 5px;">รวมเพลงรัก ฟังตอนคลั่งรัก 🎶</div>
+                <div style="font-size: 11px; color: #888; margin-bottom: 15px;">เปิดฟังเพลงโปรดจาก YouTube ด้วยกัน</div>
+                
+                <div class="music-controls" style="justify-content: center;">
+                    <button class="control-btn" id="playPauseBtn" onclick="toggleYouTubeMusic()"><i class="fas fa-play"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- APP MODAL 5: ROLEPLAY SURVIVAL QUIZ (50 ด่าน สลับช้อยส์ + ดาว + จำด่าน) -->
+        <div class="app-modal" id="app-quiz">
+            <div class="modal-header">
+                <span class="modal-title" id="quizAppTitle">🎮 โรลเพลย์เอาตัวรอด</span>
+                <button class="close-app-btn" onclick="closeApp('app-quiz')">ปิด</button>
+            </div>
+            <div class="quiz-box" id="quizBox">
+                <div class="quiz-hud">
+                    <button class="quiz-nav-btn" onclick="prevQuizStage()"><i class="fas fa-arrow-left"></i> ย้อนกลับ</button>
+                    <span id="quizStage">ด่านที่ 1 / 50</span>
+                    <span id="quizTimer">⏱️ 15s</span>
+                </div>
+                <div class="quiz-question" id="quizQuestionText">กำลังโหลดสถานการณ์...</div>
+                <div class="quiz-options" id="quizOptionsContainer"></div>
+                <div id="quizFeedbackArea" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- APP MODAL 6: VOICE ME&U -->
+        <div class="app-modal" id="app-voice">
+            <div class="modal-header">
+                <span class="modal-title">🎙️ Voice me&U</span>
+                <button class="close-app-btn" onclick="closeApp('app-voice')">ปิด</button>
+            </div>
+            <div class="voice-container" id="voiceContainer"></div>
+            <div class="record-box">
+                <div style="font-size: 12px; color: #01579b; font-weight: 700; margin-bottom: 6px;" id="recordStatusLabel">กดปุ่มเพื่ออัดเสียงบอกความรู้สึก</div>
+                <button class="record-btn" id="recordToggleBtn" onclick="toggleRecordVoice()"><i class="fas fa-microphone"></i> เริ่มอัดเสียง</button>
+            </div>
+        </div>
+
+        <!-- APP MODAL 7: MEMORY -->
+        <div class="app-modal" id="app-memory">
+            <div class="modal-header">
+                <span class="modal-title">⏰ ตัวนับวันรักกัน</span>
+                <button class="close-app-btn" onclick="closeApp('app-memory')">ปิด</button>
+            </div>
+            <div class="card-box" style="text-align: center; padding: 15px;">
+                <div style="font-size: 13px; color: #5d4037; font-weight: 700;">เรารักกันมาตั้งแต่วันที่ 3 พฤษภาคม 2569 ❤️</div>
+                <div style="font-size: 30px; font-weight: 700; color: #ff6b81; margin: 8px 0; font-family: 'Quicksand', sans-serif;" id="daysTogetherCount">0 เดือน 0 วัน</div>
+                
+                <div class="timer-grid">
+                    <div class="timer-unit"><div class="timer-val" id="rtHours">0</div><div class="timer-lbl">ชั่วโมง</div></div>
+                    <div class="timer-unit"><div class="timer-val" id="rtMinutes">0</div><div class="timer-lbl">นาที</div></div>
+                    <div class="timer-unit" style="grid-column: span 2;"><div class="timer-val" id="rtSeconds">0</div><div class="timer-lbl">วินาที</div></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- YouTube IFrame API Script -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        // ----------------- CONFIG FIREBASE -----------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfawvvg9Sz39oxnl4zRJUP0LYuE2xOIMI",
+            authDomain: "lili-ca94d.firebaseapp.com",
+            databaseURL: "https://lili-ca94d-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lili-ca94d",
+            storageBucket: "lili-ca94d.firebasestorage.app",
+            messagingSenderId: "470709844379",
+            appId: "1:470709844379:web:473d84d3d9257fc13b893e",
+            measurementId: "G-S1K3VYNKF1"
+        };
+        
+        try {
+            firebase.initializeApp(firebaseConfig);
+            var db = firebase.database();
+        } catch(e) {
+            console.log("Firebase Init Warning:", e);
+        }
+
+        let currentUser = "ไนท์";
+
+        // ----------------- YOUTUBE PLAYER -----------------
+        let ytPlayer = null;
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('youtubePlayerContainer', {
+                height: '0', width: '0', videoId: 'FyMag6uKDnQ',
+                playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': 'FyMag6uKDnQ' }
+            });
+        }
+        function toggleYouTubeMusic() {
+            playKeyClickSound();
+            const btn = document.getElementById('playPauseBtn');
+            const disk = document.getElementById('musicDisk');
+            if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') {
+                alert("กำลังโหลดเพลง กรุณารอสักครู่แล้วลองกดอีกครั้งค่ะ");
+                return;
+            }
+            if (ytPlayer.getPlayerState() === 1) {
+                ytPlayer.pauseVideo();
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+                disk.classList.remove('playing');
+            } else {
+                ytPlayer.playVideo();
+                btn.innerHTML = '<i class="fas fa-pause"></i>';
+                disk.classList.add('playing');
+            }
+        }
+
+        // ----------------- ROLEPLAY SURVIVAL QUIZ (50 ด่าน แยกมุมมอง + สลับช้อยส์ + ดาว + จำด่าน) -----------------
+        const rawQuizLi = [
+            {
+                q: "ด่านที่ 1: สงกรานต์ปีนี้ ลี่จะขอไนท์ไปเล่นน้ำกับแก๊งเพื่อนผู้ชายตัวมัม จะพูดสกิลยังไงให้รอด?",
+                options: [
+                    { text: "ก. ไปกับเพื่อนผู้ชายล้วนค่ะที่รัก มีซิกแพคทุกคนด้วย", isCorrect: false },
+                    { text: "ข. ขอไปจอยสตรีทฟู้ดกับเพื่อนสาวค่ะ มีเพื่อนผู้ชายเดินห่างๆ 100 เมตรเอง", isCorrect: true },
+                    { text: "ค. ไม่ขอค่ะ เดินออกจากห้องเงียบๆ เดี๋ยวทักบอกตอนถึง", isCorrect: false }
+                ],
+                wrongText: "โดนลี่ลี่ด่าแน่! ตอบแบบนี้เตรียมตัวนอนนอกห้องได้เลยจ้า 💀",
+                correctText: "ตอบได้เริ่ดมากที่รัก ผ่านแบบตัวมารดา รอดตายหวุดหวิด! ✨"
+            },
+            {
+                q: "ด่านที่ 2: ลี่อยากขอไนท์ไปกินเหล้าสตรีทบาร์กับเพื่อนสาวตอนตี 1 จะเปิดบทสนทนายังไงดี?",
+                options: [
+                    { text: "ก. ตัวเองเค้าไปกินเหล้ากับเพื่อนนะ ถ้าไม่ให้ไปเค้าจะงอน 3 วัน", isCorrect: false },
+                    { text: "ข. ที่รักคะ เพื่อนอกหักร้องไห้หนักมาก ลี่ต้องไปปลอบเพื่อนที่ร้านเหล้าแป๊บเดียวเอง", isCorrect: true },
+                    { text: "ค. โอนเงินมาให้ 2,000 จะไปเมาหัวราน้ำกับเพื่อนค่ะ", isCorrect: false }
+                ],
+                wrongText: "โบกมือลาอิสรภาพได้เลย โดนสวดมนต์ยาวแน่แม่! ❌",
+                correctText: "เนียนกริบ อ้างเพื่อนอกหักผ่านฉลุย เก่งมากตัวแม่! 💅"
+            },
+            {
+                q: "ด่านที่ 3: ชวนเพื่อนไปเที่ยวผับแต่เพื่อนเท ลี่ควรตัดสินใจยังไงกับไนท์?",
+                options: [
+                    { text: "ก. งั้นลี่ไปนั่งคนเดียวหาผู้ใหม่หล่อๆ ดีกว่า", isCorrect: false },
+                    { text: "ข. ยกเลิกแล้วกลับมาอ้อนไนท์ชวนดูซีรีส์เกาหลีฟินๆ ดีกว่า", isCorrect: true },
+                    { text: "ค. นั่งแท็กซี่ไปกินคนเดียวประชดชีวิตซะเลย", isCorrect: false }
+                ],
+                wrongText: "พังพินาศ! ตอบแบบนี้โดนสับเละแน่ 🤡",
+                correctText: "ฉลาดมากค่ะซิสเตอร์ เลือกแฟนยืนหนึ่ง! 💖"
+            },
+            {
+                q: "ด่านที่ 4: เมากลับมาห้องแล้วไนท์บ่น ลี่จะสวนกลับยังไงให้รอดตัว?",
+                options: [
+                    { text: "ก. บ่นอะไรนักหนา รำคาญ ไปนอนไป!", isCorrect: false },
+                    { text: "ข. วิ่งเข้าไปกอดหอมแก้มแล้วบอกว่า 'คิดถึงไนท์ที่สุดเลยคนดี ขอยาดมหน่อย'", isCorrect: true },
+                    { text: "ค. แกล้งหลับหนีแล้วนอนน้ำลายยืดใส่หมอน", isCorrect: false }
+                ],
+                wrongText: "ตายสนิท! โดนงดเที่ยว 3 เดือนชัวร์ 🛑",
+                correctText: "สกิลเอาตัวรอดระดับ 10 เต็ม 10 รอดตัวแบบเนียนๆ! 👑"
+            },
+            {
+                q: "ด่านที่ 5: เพื่อนชวนไปทริปต่างจังหวัด 3 วัน 2 คืนกับแก๊งเพื่อนม.ปลาย (มีผู้ชายด้วย)",
+                options: [
+                    { text: "ก. ไปค่ะ สนุกแน่ งานนี้ห้ามห้ามนะ", isCorrect: false },
+                    { text: "ข. ชวนไนท์ไปด้วยกันแพ็คคู่ จะได้แฮปปี้ทั้งสองฝ่าย", isCorrect: true },
+                    { text: "ค. โกหกไนท์ว่าไปนอนบ้านแม่แต่แอบไปเที่ยวทะเล", isCorrect: false }
+                ],
+                wrongText: "โป๊ะแตกแน่นอน เตรียมตัวเคลียร์ใจยาวๆ ⚡",
+                correctText: "ฉลาดเป็นกรด ชวนแฟนไปคุมด้วย จบปัญหาโลกแตก! 🎉"
+            }
+        ];
+
+        const rawQuizNight = [
+            {
+                q: "ด่านที่ 1: สงกรานต์นี้ ไนท์ขอลี่ไปเล่นน้ำกับเพื่อนฝูงปะแป้งสาวๆ จะแก้ตัวยังไง?",
+                options: [
+                    { text: "ก. ไปปะแป้งนมโตๆ มาครับที่รัก สนุกมากเลย", isCorrect: false },
+                    { text: "ข. ไปสาดน้ำกับแก๊งเพื่อนผู้ชายล้วนครับ ถ่ายรูปส่งรายงานทุกๆ 10 นาทีเลย", isCorrect: true },
+                    { text: "ค. หนีเที่ยวไม่บอก ลี่โทรตามค่อยรับสาย", isCorrect: false }
+                ],
+                wrongText: "โดนลี่ลี่ด่าแน่! ตอบแบบนี้เตรียมตัวนอนนอกห้องได้เลยจ้า 💀",
+                correctText: "รอดตัวแบบฉลาดเป็นกรด ส่งเรดาร์รายงานตัวเป๊ะ! 🛡️"
+            },
+            {
+                q: "ด่านที่ 2: ไนท์อยากขอไปกินเหล้าปาร์ตี้วันเกิดเพื่อนสนิทตอนดึกๆ จะพูดกับลี่ว่าไงดี?",
+                options: [
+                    { text: "ก. เพื่อนบังคับให้ไป ห้ามปฏิเสธ เดี๋ยวเพื่อนโกรธ", isCorrect: false },
+                    { text: "ข. ที่รักครับ วันเกิดไอ้ ฯ เพื่อนรัก ลี่อนุญาตให้ไนท์ไปแป๊บเดียวนะ เดี๋ยวรีบกลับมาซบครับ", isCorrect: true },
+                    { text: "ค. ไม่ขอครับ ออกจากบ้านเลยค่อยไลน์บอก", isCorrect: false }
+                ],
+                wrongText: "เตรียมตัวโดนสับเละเป็นโจ๊ก ไนท์เอ๋ย! ❌",
+                correctText: "อ้อนเก่ง ขออนุญาตแบบนี้ลี่ใจอ่อนยวบเลยพ่อหนุ่ม! 🥰"
+            },
+            {
+                q: "ด่านที่ 3: เพื่อนในกลุ่มส่งรูปร้านเหล้าสาวๆ มายั่ว ไนท์ควรทำไงต่อหน้าลี่?",
+                options: [
+                    { text: "ก. กดไลก์แล้วคอมเมนต์แซวว่าแซ่บจัง", isCorrect: false },
+                    { text: "ข. เมินเฉยแล้วหันมาจุ๊บเหม่งลี่ พร้อมบอกว่า 'สู้แฟนเราไม่ได้สักคน'", isCorrect: true },
+                    { text: "ค. ส่งรูปให้ลี่ดูแล้วชวนไปสสส.ด้วยกัน", isCorrect: false }
+                ],
+                wrongText: "ซวยแล้วไนท์ งานนี้มีบ้านแตก! 🚨",
+                correctText: "คะแนนความคลั่งรักเต็มสิบไม่หัก เอาโล่ไปเลยพ่อหนุ่ม! 🏆"
+            },
+            {
+                q: "ด่านที่ 4: เมาแล้วเพื่อนจะลากไปต่อร้านคาราโอเกะ ไนท์จะปฏิเสธยังไง?",
+                options: [
+                    { text: "ก. ไปต่อสิครับ กลัวอะไร สายปาร์ตี้อยู่แล้ว", isCorrect: false },
+                    { text: "ข. ไม่เอาอ่ะ เกรงใจลี่ เดี๋ยวลี่รอนานที่ห้อง รีบกลับดีกว่า", isCorrect: true },
+                    { text: "ค. ปิดเครื่องหนีแล้วไปต่อยาวๆ", isCorrect: false }
+                ],
+                wrongText: "เตรียมตัวโดนตัดแต้มชีวิตคู่ ติดลบสิบไปเลย! 🛑",
+                correctText: "รักตายเลยแบบนี้ เป็นแฟนที่ประเสริฐที่สุด! 💖"
+            },
+            {
+                q: "ด่านที่ 5: ลี่งอนเรื่องเกม ไนท์จะงัดไม้ตายไหนมาง้อด่วนๆ?",
+                options: [
+                    { text: "ก. งอนอะไรไร้สาระ แค่เล่นเกมเอง", isCorrect: false },
+                    { text: "ข. ปิดเกมทันที พุ่งเข้าไปโอบกอดแล้วบอกว่า 'โอ๋ๆ นะครับ เกมสู้ลี่ไม่ได้หรอก' พร้อมโอนเงินเปย์ชาบู", isCorrect: true },
+                    { text: "ค. ปล่อยให้งอนไป เดี๋ยวก็หายเอง", isCorrect: false }
+                ],
+                wrongText: "ดับอนาถ! เตรียมตัวนอนนอกห้องยาวๆ ⚡",
+                correctText: "คอมโบ สายเปย์และสายอ้อน ทำคะแนนนำโด่งชนะเลิศ! 🎉"
+            }
+        ];
+
+        let activeQuizList = [];
+        let currentQuizIdx = 0;
+        let highestQuizStage = 0;
+        let quizTimerInterval = null;
+        let timeLeft = 15;
+        let currentShuffledOptions = [];
+
+        function initQuizList() {
+            const rawList = (currentUser === 'ลี่') ? rawQuizLi : rawQuizNight;
+            activeQuizList = JSON.parse(JSON.stringify(rawList));
+            
+            for (let i = 6; i <= 50; i++) {
+                activeQuizList.push({
+                    q: `ด่านที่ ${i}: สถานการณ์จำลองเอาตัวรอดระดับวิกฤตของ${currentUser} (โหมดชีวิตคู่ 50 ด่าน)`,
+                    options: [
+                        { text: "ก. เลือกตอบตามใจฉัน งานนี้เตรียมตัวโดนสวดมนต์ยาว", isCorrect: false },
+                        { text: "ข. เลือกคำตอบเอาใจแฟนยืนหนึ่ง เพื่อความสงบสุขของชีวิตคู่", isCorrect: true },
+                        { text: "ค. เนียนเปลี่ยนเรื่องคุยทันที ทำเป็นไม่รู้ไม่ชี้", isCorrect: false }
+                    ],
+                    wrongText: `โดน${currentUser === 'ลี่' ? 'ลี่ลี่' : 'ไนท์'}ด่าแน่! ไม่ผ่านจ้า ตอบใหม่ด่วน 💀`,
+                    correctText: "ตอบได้เริ่ดมากที่รัก ผ่านแบบตัวมารดา! ✨"
+                });
+            }
+        }
+
+        function loadSavedQuizProgress() {
+            const saveKey = `quiz_progress_${currentUser}`;
+            if (typeof db !== 'undefined' && db.ref) {
+                db.ref(saveKey).once('value', (snapshot) => {
+                    const val = snapshot.val();
+                    if (val !== null) {
+                        highestQuizStage = val.highest || 0;
+                        currentQuizIdx = val.current || 0;
+                    } else {
+                        highestQuizStage = 0;
+                        currentQuizIdx = 0;
+                    }
+                });
+            } else {
+                const saved = JSON.parse(localStorage.getItem(saveKey) || '{}');
+                highestQuizStage = saved.highest || 0;
+                currentQuizIdx = saved.current || 0;
+            }
+        }
+
+        function saveQuizProgress() {
+            const saveKey = `quiz_progress_${currentUser}`;
+            if (currentQuizIdx > highestQuizStage) {
+                highestQuizStage = currentQuizIdx;
+            }
+            const data = { highest: highestQuizStage, current: currentQuizIdx };
+
+            if (typeof db !== 'undefined' && db.ref) {
+                db.ref(saveKey).set(data);
+            } else {
+                localStorage.setItem(saveKey, JSON.stringify(data));
+            }
+        }
+
+        function loadQuizScreen() {
+            initQuizList();
+            loadSavedQuizProgress();
+            
+            const titleEl = document.getElementById('quizAppTitle');
+            const homeNameEl = document.getElementById('homeQuizName');
+            if (titleEl) titleEl.innerText = currentUser === 'ลี่' ? "💅 ลี่คุมสถานการณ์" : "💀 ไนท์รอดตายมั้ย";
+            if (homeNameEl) homeNameEl.innerText = currentUser === 'ลี่' ? "ลี่คุมเกม" : "ไนท์รอดตาย";
+            
+            renderQuizQuestion();
+        }
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function renderQuizQuestion() {
+            if (quizTimerInterval) clearInterval(quizTimerInterval);
+            const qObj = activeQuizList[currentQuizIdx];
+            
+            const stageEl = document.getElementById('quizStage');
+            const timerEl = document.getElementById('quizTimer');
+            const qTextEl = document.getElementById('quizQuestionText');
+            const optContainer = document.getElementById('quizOptionsContainer');
+            const feedbackArea = document.getElementById('quizFeedbackArea');
+
+            if (stageEl) stageEl.innerText = `ด่านที่ ${currentQuizIdx + 1} / 50`;
+            if (qTextEl) qTextEl.innerText = qObj.q;
+            if (feedbackArea) { feedbackArea.style.display = 'none'; feedbackArea.innerHTML = ''; }
+            
+            currentShuffledOptions = shuffleArray(qObj.options);
+
+            if (optContainer) {
+                optContainer.style.display = 'flex';
+                optContainer.innerHTML = '';
+                currentShuffledOptions.forEach((opt) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'quiz-opt-btn';
+                    btn.innerText = opt.text;
+                    btn.onclick = () => checkQuizAnswer(opt.isCorrect);
+                    optContainer.appendChild(btn);
+                });
+            }
+
+            timeLeft = 15;
+            if (timerEl) timerEl.innerText = `⏱️ ${timeLeft}s`;
+            quizTimerInterval = setInterval(() => {
+                timeLeft--;
+                if (timerEl) timerEl.innerText = `⏱️ ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(quizTimerInterval);
+                    checkQuizAnswer(false, true);
+                }
+            }, 1000);
+        }
+
+        function checkQuizAnswer(isCorrect, isTimeout = false) {
+            if (quizTimerInterval) clearInterval(quizTimerInterval);
+            
+            const qObj = activeQuizList[currentQuizIdx];
+            const optContainer = document.getElementById('quizOptionsContainer');
+            const feedbackArea = document.getElementById('quizFeedbackArea');
+
+            if (optContainer) optContainer.style.display = 'none';
+            if (feedbackArea) {
+                feedbackArea.style.display = 'block';
+                
+                if (isCorrect) {
+                    playKeyClickSound();
+                    let stars = "⭐";
+                    if (timeLeft >= 11) stars = "⭐⭐⭐";
+                    else if (timeLeft >= 6) stars = "⭐⭐";
+                    
+                    feedbackArea.style.background = '#c8e6c9';
+                    feedbackArea.style.color = '#2e7d32';
+                    feedbackArea.innerHTML = `
+                        <div class="star-rating-box">${stars}</div>
+                        <div>${qObj.correctText}</div>
+                        <div style="font-size:11px; margin-top:4px; color:#388e3c;">ใช้เวลาไป ${15 - timeLeft} วินาที</div>
+                        <button class="send-letter-btn" style="margin-top:10px; width:100%; padding:10px;" onclick="nextQuizStage()">ด่านถัดไป ➡️</button>
+                    `;
+                    saveQuizProgress();
+                } else {
+                    playErrorSound();
+                    feedbackArea.style.background = '#ffcdd2';
+                    feedbackArea.style.color = '#c62828';
+                    let msg = isTimeout ? "⏰ หมดเวลา 15 วิ! คิดช้าเกินไป โดนงอนเรียบร้อย 💀" : qObj.wrongText;
+                    
+                    feedbackArea.innerHTML = `
+                        <div style="font-size:30px; margin-bottom:5px;">❌</div>
+                        <div>${msg}</div>
+                        <button class="send-letter-btn" style="margin-top:10px; width:100%; padding:10px; background:#e53935;" onclick="retryQuizStage()">ลองใหม่อีกครั้ง 🔄</button>
+                    `;
+                }
+            }
+        }
+
+        function retryQuizStage() {
+            playKeyClickSound();
+            renderQuizQuestion();
+        }
+
+        function nextQuizStage() {
+            playKeyClickSound();
+            if (currentQuizIdx < 49) {
+                currentQuizIdx++;
+                saveQuizProgress();
+                renderQuizQuestion();
+            } else {
+                alert("🎉 ยินดีด้วยค่ะ! คุณเอาตัวรอดผ่านครบทั้ง 50 ด่านแล้ว สุดยอดคู่รักแห่งปี!");
+            }
+        }
+
+        function prevQuizStage() {
+            playKeyClickSound();
+            if (currentQuizIdx > 0) {
+                currentQuizIdx--;
+                saveQuizProgress();
+                renderQuizQuestion();
+            } else {
+                alert("นี่คือด่านแรกสุดแล้วค่ะ!");
+            }
+        }
+
+        // ----------------- VOICE ME&U (ระบบอัดเสียงปรับปรุงใหม่ 100%) -----------------
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        function getSupportedMimeType() {
+            const types = [
+                'audio/webm;codecs=opus',
+                'audio/webm',
+                'audio/mp4',
+                'audio/aac',
+                'audio/ogg'
+            ];
+            for (let type of types) {
+                if (MediaRecorder.isTypeSupported(type)) return type;
+            }
+            return '';
+        }
+
+        async function toggleRecordVoice() {
+            playKeyClickSound();
+            const btn = document.getElementById('recordToggleBtn');
+            const label = document.getElementById('recordStatusLabel');
+
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    const mimeType = getSupportedMimeType();
+                    
+                    mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = e => {
+                        if (e.data && e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        stream.getTracks().forEach(track => track.stop());
+
+                        const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/mp4' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            const base64Audio = reader.result;
+                            const now = new Date();
+                            const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`;
+                            
+                            const voiceData = {
+                                author: currentUser,
+                                audio: base64Audio,
+                                time: timeStr
+                            };
+
+                            saveAndRenderVoice(voiceData);
+                        };
+                    };
+
+                    mediaRecorder.start(200);
+                    isRecording = true;
+                    btn.classList.add('recording');
+                    btn.innerHTML = '<i class="fas fa-stop"></i> หยุดและส่งเสียง';
+                    if (label) label.innerText = "กำลังอัดเสียง... พูดได้เลยค่ะ 🎙️";
+
+                } catch (err) {
+                    console.error("Mic Access Error:", err);
+                    alert("❌ ไม่สามารถอัดเสียงได้: กรุณากดอนุญาตให้ใช้ไมโครโฟน (Microphone Permission) ในตั้งค่าเบราว์เซอร์ของคุณก่อนนะคะ");
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+                isRecording = false;
+                btn.classList.remove('recording');
+                btn.innerHTML = '<i class="fas fa-microphone"></i> เริ่มอัดเสียง';
+                if (label) label.innerText = "กดปุ่มเพื่ออัดเสียงบอกความรู้สึก";
+            }
+        }
+
+        function saveAndRenderVoice(voiceData) {
+            if (typeof db !== 'undefined' && db.ref) {
+                db.ref('voices').push(voiceData);
+            } else {
+                let local = JSON.parse(localStorage.getItem('local_voices') || '[]');
+                local.unshift(voiceData);
+                localStorage.setItem('local_voices', JSON.stringify(local));
+                renderLocalVoices();
+            }
+        }
+
+        function loadVoices() {
+            if (typeof db !== 'undefined' && db.ref) {
+                db.ref('voices').on('value', (snapshot) => {
+                    const container = document.getElementById('voiceContainer');
+                    if (!container) return;
+                    const data = snapshot.val();
+                    if (!data) {
+                        container.innerHTML = `<div style="text-align:center; padding:25px; color:#888; font-size:13px;">ยังไม่มีข้อความเสียง ลองกดอัดเสียงส่งหากันดูสิคะ 🎙️</div>`;
+                        return;
+                    }
+                    container.innerHTML = '';
+                    const voices = Object.values(data).reverse();
+                    voices.forEach(v => {
+                        const item = document.createElement('div');
+                        item.className = 'voice-card';
+                        item.innerHTML = `
+                            <div class="voice-info">
+                                <div class="voice-author">🎙️ เสียงจาก ${v.author}</div>
+                                <div class="voice-time">${v.time}</div>
+                            </div>
+                            <button class="play-voice-btn" onclick="playVoiceAudio('${v.audio}')"><i class="fas fa-play"></i></button>
+                        `;
+                        container.appendChild(item);
+                    });
+                });
+            } else {
+                renderLocalVoices();
+            }
+        }
+
+        function renderLocalVoices() {
+            const container = document.getElementById('voiceContainer');
+            if (!container) return;
+            let local = JSON.parse(localStorage.getItem('local_voices') || '[]');
+            if (local.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:25px; color:#888; font-size:13px;">ยังไม่มีข้อความเสียง (โหมดออฟไลน์) 🎙️</div>`;
+                return;
+            }
+            container.innerHTML = '';
+            local.forEach(v => {
+                const item = document.createElement('div');
+                item.className = 'voice-card';
+                item.innerHTML = `
+                    <div class="voice-info">
+                        <div class="voice-author">🎙️ เสียงจาก ${v.author}</div>
+                        <div class="voice-time">${v.time}</div>
+                    </div>
+                    <button class="play-voice-btn" onclick="playVoiceAudio('${v.audio}')"><i class="fas fa-play"></i></button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function playVoiceAudio(base64Str) {
+            playKeyClickSound();
+            const audio = new Audio(base64Str);
+            audio.play().catch(e => console.log("Play audio error:", e));
+        }
+
+        loadVoices();
+
+        // ----------------- REALTIME CLOCK & COUNTER -----------------
+        const startDate = new Date(2026, 4, 3, 0, 0, 0);
+
+        function updateRealTimeClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeStr = `${hours}:${minutes}`;
+            
+            const statusBarTimeEl = document.getElementById('statusBarTime');
+            const lockScreenTimeEl = document.getElementById('lockScreenTime');
+            const lockScreenDateEl = document.getElementById('lockScreenDate');
+
+            if (statusBarTimeEl) statusBarTimeEl.innerText = timeStr;
+            if (lockScreenTimeEl) lockScreenTimeEl.innerText = timeStr;
+
+            const daysArr = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+            const monthsArr = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+            
+            if (lockScreenDateEl) {
+                lockScreenDateEl.innerText = `วัน${daysArr[now.getDay()]}ที่ ${now.getDate()} ${monthsArr[now.getMonth()]} ${now.getFullYear() + 543}`;
+            }
+
+            let diffMonths = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+            let tempDate = new Date(startDate);
+            tempDate.setMonth(tempDate.getMonth() + diffMonths);
+            if (now < tempDate) { diffMonths--; tempDate.setMonth(tempDate.getMonth() - 1); }
+            const diffDays = Math.floor((now - tempDate) / (1000 * 60 * 60 * 24));
+
+            const diffTime = Math.abs(now - startDate);
+            const totalSeconds = Math.floor(diffTime / 1000);
+            
+            const daysCountEl = document.getElementById('daysTogetherCount');
+            const rtHoursEl = document.getElementById('rtHours');
+            const rtMinutesEl = document.getElementById('rtMinutes');
+            const rtSecondsEl = document.getElementById('rtSeconds');
+
+            if (daysCountEl) daysCountEl.innerText = `${diffMonths} เดือน ${diffDays} วัน`;
+            if (rtHoursEl) rtHoursEl.innerText = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+            if (rtMinutesEl) rtMinutesEl.innerText = Math.floor((totalSeconds % 3600) / 60);
+            if (rtSecondsEl) rtSecondsEl.innerText = totalSeconds % 60;
+        }
+
+        setInterval(updateRealTimeClock, 1000);
+        updateRealTimeClock();
+
+        // ----------------- PROFILE SELECT -----------------
+        function selectUser(name) {
+            playKeyClickSound();
+            currentUser = name;
+            const welcomeTextEl = document.getElementById('welcomeText');
+            if (welcomeTextEl) {
+                welcomeTextEl.innerText = `welcome to my heart ${currentUser === 'ไนท์' ? 'naka night' : 'naka lee'} ✨`;
+            }
+            loadQuizScreen();
+            document.getElementById('profile-screen').classList.remove('active');
+            document.getElementById('home-screen').classList.add('active');
+        }
+
+        // ----------------- REALTIME LETTERS (FIREBASE) -----------------
+        function sendLetter() {
+            playKeyClickSound();
+            const input = document.getElementById('letterInput');
+            if (!input || !input.value.trim()) return;
+
+            const now = new Date();
+            const timeString = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`;
+            const newLetter = { author: currentUser, text: input.value, time: timeString };
+
+            if (typeof db !== 'undefined' && db.ref) {
+                db.ref('letters').push(newLetter);
+            } else {
+                let localLetters = JSON.parse(localStorage.getItem('local_letters') || '[]');
+                localLetters.unshift(newLetter);
+                localStorage.setItem('local_letters', JSON.stringify(localLetters));
+                renderLocalLetters();
+            }
+            input.value = "";
+        }
+
+        function loadLetters() {
+            if (typeof db !== 'undefined' && db.ref) {
+                db.ref('letters').on('value', (snapshot) => {
+                    const container = document.getElementById('letterContainer');
+                    if (!container) return;
+                    const data = snapshot.val();
+                    if (!data) {
+                        container.innerHTML = `<div style="text-align:center; padding:20px; color:#888; font-size:13px;">ยังไม่มีข้อความ ลองพิมพ์ความในใจส่งหากันดูสิคะ 💌</div>`;
+                        return;
+                    }
+                    container.innerHTML = '';
+                    const letters = Object.values(data).reverse();
+                    letters.forEach(l => {
+                        const div = document.createElement('div');
+                        div.className = 'letter-item';
+                        div.innerHTML = `<div class="letter-author">💬 ${l.author} เขียนเมื่อ ${l.time}</div><div class="letter-text">${l.text}</div>`;
+                        container.appendChild(div);
+                    });
+                });
+            } else {
+                renderLocalLetters();
+            }
+        }
+
+        function renderLocalLetters() {
+            const container = document.getElementById('letterContainer');
+            if (!container) return;
+            let localLetters = JSON.parse(localStorage.getItem('local_letters') || '[]');
+            if (localLetters.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:20px; color:#888; font-size:13px;">ยังไม่มีข้อความ (โหมดออฟไลน์) 💌</div>`;
+                return;
+            }
+            container.innerHTML = '';
+            localLetters.forEach(l => {
+                const div = document.createElement('div');
+                div.className = 'letter-item';
+                div.innerHTML = `<div class="letter-author">💬 ${l.author} เขียนเมื่อ ${l.time}</div><div class="letter-text">${l.text}</div>`;
+                container.appendChild(div);
+            });
+        }
+        loadLetters();
+
+        // ----------------- CAMERA & PHOTOS -----------------
+        let videoStream = null;
+        let useFrontCamera = true;
+
+        async function startCamera() {
+            const video = document.getElementById('webcam');
+            const indicator = document.getElementById('cameraUserIndicator');
+            if (indicator) indicator.innerText = `ผู้ถ่าย: ${currentUser}`;
+            try {
+                if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+                
+                const constraints = {
+                    video: { facingMode: useFrontCamera ? 'user' : 'environment' },
+                    audio: false
+                };
+                
+                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                if (video) {
+                    video.srcObject = videoStream;
+                    video.className = useFrontCamera ? 'front-cam' : 'back-cam';
+                }
+            } catch (err) {
+                console.log("Camera error:", err);
+                alert("ไม่สามารถเปิดกล้องได้ หรือเบราว์เซอร์ไม่อนุญาตสิทธิ์การใช้งานกล้อง");
+            }
+        }
+
+        function toggleCameraFacing() {
+            playKeyClickSound();
+            useFrontCamera = !useFrontCamera;
+            startCamera();
+        }
+
+        function stopCamera() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(t => t.stop());
+                videoStream = null;
+            }
+        }
+
+        function takeSnapshot() {
+            playCameraSound();
+            const video = document.getElementById('webcam');
+            const canvas = document.getElementById('photoCanvas');
+            const flash = document.getElementById('cameraFlash');
+            const captionInput = document.getElementById('photoCaptionInput');
+
+            if (flash) {
+                flash.style.opacity = '1';
+                setTimeout(() => { flash.style.opacity = '0'; }, 150);
+            }
+
+            if (!video || !canvas) return;
+            canvas.width = video.videoWidth || 320;
+            canvas.height = video.videoHeight || 240;
+            const ctx = canvas.getContext('2d');
+            
+            if (useFrontCamera) {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const now = new Date();
+            const timeString = `${now.getDate()} ${['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][now.getMonth()]} ${now.getFullYear()+543} เวลา ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`;
+            
+            const photoData = {
+                image: canvas.toDataURL('image/png'),
+                uploader: currentUser,
+                caption: captionInput && captionInput.value ? captionInput.value : "ความทรงจำของเรา 💖",
+                time: timeString
+            };
+
+            if (typeof db !== 'undefined' && db.ref) {
+                db.ref('photos').push(photoData);
+            } else {
+                let localPhotos = JSON.parse(localStorage.getItem('local_photos') || '[]');
+                localPhotos.unshift(photoData);
+                localStorage.setItem('local_photos', JSON.stringify(localPhotos));
+                renderLocalPhotos();
+            }
+
+            if (captionInput) captionInput.value = "";
+            closeApp('app-camera');
+            openApp('app-photos');
+        }
+
+        function loadPhotos() {
+            if (typeof db !== 'undefined' && db.ref) {
+                db.ref('photos').on('value', (snapshot) => {
+                    const photoGallery = document.getElementById('photoGallery');
+                    if (!photoGallery) return;
+                    const data = snapshot.val();
+                    if (!data) {
+                        photoGallery.innerHTML = `<div style="text-align:center; padding:30px; color:#888; font-size:13px;">ยังไม่มีรูปถ่าย ลองถ่ายรูปเก็บไว้สิคะ 📸</div>`;
+                        return;
+                    }
+                    photoGallery.innerHTML = '';
+                    const photos = Object.values(data).reverse();
+                    photos.forEach(p => {
+                        const item = document.createElement('div');
+                        item.className = 'photo-card';
+                        item.innerHTML = `<img src="${p.image}"><div class="photo-info"><div class="photo-uploader">📸 ${p.uploader} เป็นคนถ่าย</div><div class="photo-time"><i class="far fa-clock"></i> ${p.time}</div><div class="photo-caption">${p.caption}</div></div>`;
+                        photoGallery.appendChild(item);
+                    });
+                });
+            } else {
+                renderLocalPhotos();
+            }
+        }
+
+        function renderLocalPhotos() {
+            const photoGallery = document.getElementById('photoGallery');
+            if (!photoGallery) return;
+            let localPhotos = JSON.parse(localStorage.getItem('local_photos') || '[]');
+            if (localPhotos.length === 0) {
+                photoGallery.innerHTML = `<div style="text-align:center; padding:30px; color:#888; font-size:13px;">ยังไม่มีรูปถ่าย (โหมดออฟไลน์) 📸</div>`;
+                return;
+            }
+            photoGallery.innerHTML = '';
+            localPhotos.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'photo-card';
+                item.innerHTML = `<img src="${p.image}"><div class="photo-info"><div class="photo-uploader">📸 ${p.uploader} เป็นคนถ่าย</div><div class="photo-time"><i class="far fa-clock"></i> ${p.time}</div><div class="photo-caption">${p.caption}</div></div>`;
+                photoGallery.appendChild(item);
+            });
+        }
+        loadPhotos();
+
+        // ----------------- AUDIO & NAVIGATION -----------------
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playKeyClickSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.04);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.04);
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+        function playErrorSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.25);
+            if (navigator.vibrate) navigator.vibrate([40, 60, 40, 60, 40]);
+        }
+        function playCameraSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.type = 'square'; osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+        }
+
+        function createRain() {
+            const container = document.getElementById('rainContainer');
+            if (!container) return;
+            for (let i = 0; i < 25; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'drop';
+                drop.style.left = Math.random() * 100 + '%';
+                drop.style.animationDelay = Math.random() * 1.5 + 's';
+                drop.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
+                container.appendChild(drop);
+            }
+        }
+        createRain();
+
+        // --- รหัสผ่านหน้าจอ ---
+        const CORRECT_PASSCODE = "230869";
+        let enteredPasscode = "";
+        
+        // --- ระบบสไลด์ปลดล็อค ---
+        const handle = document.getElementById('sliderHandle');
+        const container = document.getElementById('sliderContainer');
+        const lockScreen = document.getElementById('lock-screen');
+        const passcodeScreen = document.getElementById('passcode-screen');
+        const profileScreen = document.getElementById('profile-screen');
+
+        let isDragging = false, startX = 0;
+
+        function onDragStart(e) {
+            isDragging = true;
+            startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        }
+
+        function onDragMove(e) {
+            if (!isDragging || !container || !handle) return;
+            let maxDrag = container.clientWidth - handle.clientWidth - 8;
+            let currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            let deltaX = Math.max(0, Math.min(maxDrag, currentX - startX));
+            
+            handle.style.left = (deltaX + 5) + 'px';
+
+            if (deltaX >= maxDrag * 0.8) {
+                isDragging = false;
+                unlockToPasscode();
+            }
+        }
+
+        function onDragEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+            if (handle) {
+                handle.style.transition = 'left 0.2s ease';
+                handle.style.left = '5px';
+                setTimeout(() => { handle.style.transition = ''; }, 200);
+            }
+        }
+
+        if (handle) {
+            handle.addEventListener('mousedown', onDragStart);
+            handle.addEventListener('touchstart', onDragStart, { passive: true });
+        }
+        window.addEventListener('mousemove', onDragMove);
+        window.addEventListener('mouseup', onDragEnd);
+        window.addEventListener('touchmove', onDragMove, { passive: true });
+        window.addEventListener('touchend', onDragEnd);
+
+        function unlockToPasscode() {
+            playKeyClickSound();
+            if (lockScreen) lockScreen.classList.add('slide-out');
+            if (passcodeScreen) passcodeScreen.classList.add('active');
+            if (handle) handle.style.left = '5px';
+        }
+
+        function pressKey(num, event) {
+            playKeyClickSound();
+            if (enteredPasscode.length < 6) {
+                enteredPasscode += num;
+                updateDots();
+                if (event) createHeartEffect(event);
+                if (enteredPasscode.length === 6) setTimeout(checkPasscode, 200);
+            }
+        }
+
+        function deleteKey() {
+            playKeyClickSound();
+            if (enteredPasscode.length > 0) { enteredPasscode = enteredPasscode.slice(0, -1); updateDots(); }
+        }
+
+        function updateDots() {
+            document.querySelectorAll('.dot').forEach((dot, index) => {
+                dot.classList.toggle('filled', index < enteredPasscode.length);
+            });
+        }
+
+        function createHeartEffect(e) {
+            const heart = document.createElement('i');
+            heart.className = 'fas fa-heart heart-pop';
+            const rect = e.currentTarget.getBoundingClientRect();
+            heart.style.left = (rect.width / 2 - 12) + 'px';
+            heart.style.top = (rect.height / 2 - 12) + 'px';
+            e.currentTarget.appendChild(heart);
+            setTimeout(() => { heart.remove(); }, 600);
+        }
+
+        function checkPasscode() {
+            if (enteredPasscode === CORRECT_PASSCODE) {
+                if (passcodeScreen) passcodeScreen.classList.remove('active');
+                if (profileScreen) profileScreen.classList.add('active');
+            } else {
+                playErrorSound();
+                if (passcodeScreen) passcodeScreen.classList.add('shake');
+                setTimeout(() => { 
+                    if (passcodeScreen) passcodeScreen.classList.remove('shake'); 
+                    enteredPasscode = ""; 
+                    updateDots(); 
+                }, 400);
+            }
+        }
+
+        function openApp(appId) {
+            playKeyClickSound();
+            const app = document.getElementById(appId);
+            if (app) app.classList.add('open');
+            if (appId === 'app-camera') startCamera();
+            if (appId === 'app-quiz') renderQuizQuestion();
+        }
+
+        function closeApp(appId) {
+            playKeyClickSound();
+            const app = document.getElementById(appId);
+            if (app) app.classList.remove('open');
+            if (appId === 'app-camera') stopCamera();
+            if (appId === 'app-quiz' && quizTimerInterval) clearInterval(quizTimerInterval);
+        }
+
+        function resetToLockScreen() {
+            playKeyClickSound();
+            enteredPasscode = "";
+            updateDots();
+            stopCamera();
+            if (quizTimerInterval) clearInterval(quizTimerInterval);
+            document.querySelectorAll('.app-modal').forEach(m => m.classList.remove('open'));
+            if (document.getElementById('home-screen')) document.getElementById('home-screen').classList.remove('active');
+            if (profileScreen) profileScreen.classList.remove('active');
+            if (passcodeScreen) passcodeScreen.classList.remove('active');
+            if (lockScreen) lockScreen.classList.remove('slide-out');
+            if (handle) handle.style.left = '5px';
+        }
+    </script>
+</body>
+</html>
